@@ -116,13 +116,13 @@
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-
+    
     if (self.currentOrientation != [[UIDevice currentDevice] orientation]) { // orientation changed, reload layout
         self.hotSearches = self.hotSearches;
         self.searchHistories = self.searchHistories;
         self.currentOrientation = [[UIDevice currentDevice] orientation];
     }
-
+    
     CGFloat adaptWidth = 0.0;
     if (self.searchViewControllerShowMode == PYSearchViewControllerShowModePush) {
         UIButton *backButton = self.navigationItem.leftBarButtonItem.customView;
@@ -148,14 +148,14 @@
                 }
             }
         }
-        _searchBar.py_width = self.view.py_width - adaptWidth - PYSEARCH_MARGIN * 3 - 8;
+        _searchBar.py_width = self.view.py_width - PYSEARCH_MARGIN * 3 - 8;
         _searchBar.py_height = self.view.py_width > self.view.py_height ? 24 : 30;
         _searchTextField.frame = _searchBar.bounds;
     } else {
         UIView *titleView = self.navigationItem.titleView;
         titleView.py_x = PYSEARCH_MARGIN * 1.5;
         titleView.py_y = self.view.py_width > self.view.py_height ? 3 : 7;
-        titleView.py_width = self.view.py_width - self.cancelButtonWidth - titleView.py_x * 2 - 3;
+        titleView.py_width = self.view.py_width - titleView.py_x * 2 - 3;
         titleView.py_height = self.view.py_width > self.view.py_height ? 24 : 30;
     }
 }
@@ -168,11 +168,8 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if (NULL == self.searchResultController.parentViewController) {
-        [self.searchBar becomeFirstResponder];
-    } else if (YES == self.showKeyboardWhenReturnSearchResult) {
-        [self.searchBar becomeFirstResponder];
-    }
+    
+    [self.searchBar becomeFirstResponder];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -228,10 +225,15 @@
         baseSearchTableView.backgroundColor = [UIColor clearColor];
         baseSearchTableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         if ([baseSearchTableView respondsToSelector:@selector(setCellLayoutMarginsFollowReadableWidth:)]) { // For the adapter iPad
-            baseSearchTableView.cellLayoutMarginsFollowReadableWidth = NO;
+            if (@available(iOS 9.0, *)) {
+                baseSearchTableView.cellLayoutMarginsFollowReadableWidth = NO;
+            } else {
+                // Fallback on earlier versions
+            }
         }
         baseSearchTableView.delegate = self;
         baseSearchTableView.dataSource = self;
+        [baseSearchTableView setScrollEnabled:NO];
         [self.view addSubview:baseSearchTableView];
         _baseSearchTableView = baseSearchTableView;
     }
@@ -394,9 +396,7 @@
     self.showHotSearch = YES;
     self.showSearchResultWhenSearchTextChanged = NO;
     self.showSearchResultWhenSearchBarRefocused = NO;
-    self.showKeyboardWhenReturnSearchResult = YES;
     self.removeSpaceOnSearchString = YES;
-    self.searchBarCornerRadius = 0.0;
     
     UIView *titleView = [[UIView alloc] init];
     UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:titleView.bounds];
@@ -489,7 +489,7 @@
     self.baseSearchTableView.backgroundColor = [UIColor py_colorWithHexString:@"#efefef"];
     // remove all subviews in hotSearchTagsContentView
     [self.hotSearchTagsContentView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-  
+    
     CGFloat rectangleTagH = 40;
     for (int i = 0; i < self.hotSearches.count; i++) {
         UILabel *rectangleTagLabel = [[UILabel alloc] init];
@@ -698,19 +698,6 @@
 }
 
 #pragma mark - setter
-- (void)setSearchBarCornerRadius:(CGFloat)searchBarCornerRadius
-{
-    _searchBarCornerRadius = searchBarCornerRadius;
-    
-    for (UIView *subView in self.searchTextField.subviews) {
-        if ([NSStringFromClass([subView class]) isEqualToString:@"_UISearchBarSearchFieldBackgroundView"]) {
-            subView.layer.cornerRadius = searchBarCornerRadius;
-            subView.clipsToBounds = YES;
-            break;
-        }
-    }
-}
-
 - (void)setSwapHotSeachWithSearchHistory:(BOOL)swapHotSeachWithSearchHistory
 {
     _swapHotSeachWithSearchHistory = swapHotSeachWithSearchHistory;
@@ -1053,7 +1040,7 @@
     [searchBar resignFirstResponder];
     NSString *searchText = searchBar.text;
     if (self.removeSpaceOnSearchString) { // remove sapce on search string
-       searchText = [searchBar.text stringByReplacingOccurrencesOfString:@" " withString:@""];
+        searchText = [searchBar.text stringByReplacingOccurrencesOfString:@" " withString:@""];
     }
     if (self.showSearchHistory && searchText.length > 0) {
         [self.searchHistories removeObject:searchText];
@@ -1179,6 +1166,7 @@
         self.baseSearchTableView.hidden = searchBar.text.length && !self.searchSuggestionHidden && ![self.searchSuggestionVC.tableView numberOfRowsInSection:0];
     }
     [self setSearchSuggestions:self.searchSuggestions];
+    if (self.willSearchBlock) self.willSearchBlock(self, self.searchBar);
     return YES;
 }
 
@@ -1255,7 +1243,7 @@
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     self.searchBar.text = cell.textLabel.text;
-        
+    
     if ([self.delegate respondsToSelector:@selector(searchViewController:didSelectSearchHistoryAtIndex:searchText:)]) {
         [self.delegate searchViewController:self didSelectSearchHistoryAtIndex:indexPath.row searchText:cell.textLabel.text];
         [self saveSearchCacheAndRefreshView];

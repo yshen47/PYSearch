@@ -11,6 +11,8 @@
 
 typedef void(^PYDidSearchBlock)(PYSearchViewController *searchViewController, UISearchBar *searchBar, NSString *searchText);
 
+typedef void(^PYWillSearchBlock)(PYSearchViewController *searchViewController, UISearchBar *searchBar);
+
 /**
  style of popular search
  */
@@ -64,7 +66,7 @@ typedef NS_ENUM(NSInteger, PYSearchViewControllerShowMode) {
 
 /**
  Return a `UITableViewCell` object.
-
+ 
  @param searchSuggestionView    view which display search suggestions
  @param indexPath               indexPath of row
  @return a `UITableViewCell` object
@@ -73,7 +75,7 @@ typedef NS_ENUM(NSInteger, PYSearchViewControllerShowMode) {
 
 /**
  Return number of rows in section.
-
+ 
  @param searchSuggestionView    view which display search suggestions
  @param section                 index of section
  @return number of rows in section
@@ -82,7 +84,7 @@ typedef NS_ENUM(NSInteger, PYSearchViewControllerShowMode) {
 
 /**
  Return number of sections in search suggestion view.
-
+ 
  @param searchSuggestionView    view which display search suggestions
  @return number of sections
  */
@@ -90,7 +92,7 @@ typedef NS_ENUM(NSInteger, PYSearchViewControllerShowMode) {
 
 /**
  Return height for row.
-
+ 
  @param searchSuggestionView    view which display search suggestions
  @param indexPath               indexPath of row
  @return height of row
@@ -109,7 +111,7 @@ typedef NS_ENUM(NSInteger, PYSearchViewControllerShowMode) {
 
 /**
  Called when search begain.
-
+ 
  @param searchViewController    search view controller
  @param searchBar               search bar
  @param searchText              text for search
@@ -120,7 +122,7 @@ typedef NS_ENUM(NSInteger, PYSearchViewControllerShowMode) {
 
 /**
  Called when popular search is selected.
-
+ 
  @param searchViewController    search view controller
  @param index                   index of tag
  @param searchText              text for search
@@ -133,7 +135,7 @@ typedef NS_ENUM(NSInteger, PYSearchViewControllerShowMode) {
 
 /**
  Called when search history is selected.
-
+ 
  @param searchViewController    search view controller
  @param index                   index of tag or row
  @param searchText              text for search
@@ -146,11 +148,11 @@ didSelectSearchHistoryAtIndex:(NSInteger)index
 
 /**
  Called when search suggestion is selected.
-
+ 
  @param searchViewController    search view controller
  @param index                   index of row
  @param searchText              text for search
-
+ 
  Note: `searchViewController:didSearchWithSearchBar:searchText:` will not be called when this method is implemented.
  */
 - (void)searchViewController:(PYSearchViewController *)searchViewController
@@ -159,7 +161,7 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
 
 /**
  Called when search suggestion is selected, the method support more custom of search suggestion view.
-
+ 
  @param searchViewController    search view controller
  @param indexPath               indexPath of row
  @param searchBar               search bar
@@ -172,7 +174,7 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
 
 /**
  Called when search text did change, you can reload data of suggestion view thought this method.
-
+ 
  @param searchViewController    search view controller
  @param searchBar               search bar
  @param searchText              text for search
@@ -183,7 +185,7 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
 
 /**
  Called when cancel item did press, default execute `[self dismissViewControllerAnimated:YES completion:nil]`.
-
+ 
  @param searchViewController search view controller
  */
 - (void)didClickCancel:(PYSearchViewController *)searchViewController;
@@ -199,6 +201,10 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
 
 @interface PYSearchViewController : UIViewController
 
+/**
+ Customized property
+ */
+@property (nonatomic, copy) PYWillSearchBlock willSearchBlock;
 /**
  The delegate
  */
@@ -334,11 +340,6 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
 @property (nonatomic, strong) UIColor *searchBarBackgroundColor;
 
 /**
- The cornerRadius of `_UISearchBarSearchFieldBackgroundView` which from `self.searchTextField.subviews`, default is 0.0.
- */
-@property (nonatomic, assign) CGFloat searchBarCornerRadius;
-
-/**
  The barButtonItem of cancel
  */
 @property (nonatomic, strong) UIBarButtonItem *cancelBarButtonItem;
@@ -400,13 +401,8 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
 @property (nonatomic, assign) BOOL showSearchResultWhenSearchBarRefocused;
 
 /**
- Whether show keyboard when return to search result, default is YES.
- */
-@property (nonatomic, assign) BOOL showKeyboardWhenReturnSearchResult;
-
-/**
  Creates an instance of searchViewContoller with popular searches and search bar's placeholder.
-
+ 
  @param hotSearches     popular searchs
  @param placeholder     placeholder of search bar
  @return new instance of `PYSearchViewController` class
@@ -416,7 +412,7 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
 
 /**
  Creates an instance of searchViewContoller with popular searches, search bar's placeholder and the block which invoked when search begain.
-
+ 
  @param hotSearches     popular searchs
  @param placeholder     placeholder of search bar
  @param block           block which invoked when search begain

@@ -15,21 +15,6 @@
 @interface PYSearchViewController () <UISearchBarDelegate, UITableViewDelegate, UITableViewDataSource, PYSearchSuggestionViewDataSource>
 
 /**
- The header view of search view
- */
-@property (nonatomic, weak) UIView *headerView;
-
-/**
- The view of popular search
- */
-@property (nonatomic, weak) UIView *hotSearchView;
-
-/**
- The view of search history
- */
-@property (nonatomic, weak) UIView *searchHistoryView;
-
-/**
  The records of search
  */
 @property (nonatomic, strong) NSMutableArray *searchHistories;
@@ -74,10 +59,7 @@
  */
 @property (nonatomic, weak) UIView *searchHistoryTagsContentView;
 
-/**
- The base table view  of search view controller
- */
-@property (nonatomic, strong) UITableView *baseSearchTableView;
+
 
 /**
  Whether did press suggestion cell
@@ -233,7 +215,7 @@
         }
         baseSearchTableView.delegate = self;
         baseSearchTableView.dataSource = self;
-        [baseSearchTableView setScrollEnabled:NO];
+        //[baseSearchTableView setScrollEnabled:NO];
         [self.view addSubview:baseSearchTableView];
         _baseSearchTableView = baseSearchTableView;
     }

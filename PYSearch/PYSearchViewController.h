@@ -261,6 +261,20 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
  The tags of search history
  */
 @property (nonatomic, copy) NSArray<UILabel *> *searchHistoryTags;
+/**
+ The header view of search view
+ */
+@property (nonatomic, weak) UIView *headerView;
+
+/**
+ The view of popular search
+ */
+@property (nonatomic, weak) UIView *hotSearchView;
+
+/**
+ The view of search history
+ */
+@property (nonatomic, weak) UIView *searchHistoryView;
 
 /**
  The label of search history header
@@ -380,7 +394,10 @@ didSelectSearchSuggestionAtIndex:(NSInteger)index
  Whether hidden search suggstion view, default is NO.
  */
 @property (nonatomic, assign) BOOL searchSuggestionHidden;
-
+/**
+ The base table view  of search view controller
+ */
+@property (nonatomic, strong) UITableView *baseSearchTableView;
 /**
  The view controller of search result.
  */

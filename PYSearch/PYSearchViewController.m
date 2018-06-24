@@ -151,7 +151,7 @@
 {
     [super viewDidAppear:animated];
     
-    [self.searchBar becomeFirstResponder];
+    //[self.searchBar becomeFirstResponder];
 }
 
 - (void)viewWillAppear:(BOOL)animated
